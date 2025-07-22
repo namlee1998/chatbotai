@@ -1,0 +1,12 @@
+pymongo
+langchain
+langchain-community
+langchain-core
+sentence-transformers
+chromadb
+pypdf
+python-dotenv
+numpy
+langchain-huggingface
+fastapi
+jose
