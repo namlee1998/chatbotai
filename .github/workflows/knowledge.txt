@@ -1,0 +1,15 @@
+Đầu tiên phải tạo 1 thư mục.
+cd D:\ten-du-an-cua-ban
+git init
+git add .github\workflows\ci.yml
+git commit -m "Thêm workflow CI ban đầu"
+git remote add origin https://github.com/ten-cua-ban/ten-repo.git
+git push -u origin main
+
+Lỗi remote origin already exists có nghĩa là Git đã có sẵn một remote tên là origin trong repository của bạn. Bạn có 2 cách để xử lý tùy vào mục đích
+Cách 1: Cập nhật lại URL của remote origin
+git remote set-url origin https://github.com/namlee1998/chatbot.git
+Cách 2: Xóa remote origin rồi thêm lại
+git remote remove origin
+git remote add origin https://github.com/namlee1998/chatbot.git
+
