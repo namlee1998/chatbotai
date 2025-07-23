@@ -134,7 +134,3 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error("❌ WebSocket error: %s", str(e))
         await websocket.close()
-
-
-if __name__ == "__main__":
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=8000, workers=4)
