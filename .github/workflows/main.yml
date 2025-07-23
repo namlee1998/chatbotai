@@ -7,7 +7,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout mã nguồn
+        uses: actions/checkout@v3
 
       - name: Cài Node.js
         uses: actions/setup-node@v3
@@ -21,19 +22,23 @@ jobs:
 
       - name: Cài đặt dependencies
         run: |
-          pip install fastapi uvicorn python-jose dotenv
+          pip install fastapi uvicorn python-jose python-dotenv
           npm ci
 
       - name: Khởi động FastAPI backend
         run: |
-          nohup uvicorn backend.main:app --host 0.0.0.0 --port 8080 &
+          nohup uvicorn backend.main:app --host 0.0.0.0 --port 8080 > nohup.out 2>&1 &
           sleep 5
-      - name: Ghi log server (nếu có lỗi khởi động)
-        run: |
-          cat nohup.out || echo "Không có log server"
-      - name: Kiểm tra server đã sẵn sàng
-        run: |
-          curl --retry 5 --retry-connrefused http://localhost:8080/api/login
 
-      - name: Chạy kiểm thử
+      - name: Ghi log khởi động server
+        run: |
+          echo "📦 Dòng log từ uvicorn:"
+          cat nohup.out || echo "❌ Không tìm thấy file log (có thể server không khởi động)"
+
+      - name: Kiểm tra server đã sẵn sàng qua /health
+        run: |
+          until curl --silent http://localhost:8080/health | grep '"status":"ok"'; do sleep 1; done
+          echo "✅ Server đã sẵn sàng tại cổng 8080"
+
+      - name: Chạy kiểm thử frontend
         run: npm test
