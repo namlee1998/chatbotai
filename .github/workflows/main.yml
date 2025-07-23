@@ -1,0 +1,37 @@
+name: Kiểm thử FastAPI
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cài Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Cài Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cài đặt dependencies
+        run: |
+          pip install fastapi uvicorn
+          npm ci
+
+      - name: Khởi động FastAPI backend
+        run: |
+          nohup uvicorn main:app --host 0.0.0.0 --port 8080 &
+          sleep 5
+
+      - name: Kiểm tra server đã sẵn sàng
+        run: |
+          curl --retry 5 --retry-connrefused http://localhost:8080/api/login
+
+      - name: Chạy kiểm thử
+        run: npm test
