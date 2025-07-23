@@ -21,7 +21,7 @@ jobs:
 
       - name: Cài đặt dependencies
         run: |
-          pip install fastapi uvicorn
+          pip install fastapi uvicorn python-jose
           npm ci
 
       - name: Khởi động FastAPI backend
