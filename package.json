@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/namlee1998/chatbot/issues"
   },
-  "homepage": "https://github.com/namlee1998/chatbot#readme"
+  "homepage": "https://github.com/namlee1998/chatbot#readme",
+  "devDependencies": {
+    "jest": "^30.0.5"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
 }
