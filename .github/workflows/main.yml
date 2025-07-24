@@ -22,7 +22,7 @@ jobs:
 
       - name: Cài đặt dependencies
         run: |
-          pip install fastapi uvicorn python-jose python-dotenv pymongo langchain_community langchain_huggingface langchain_core python-multipart
+          pip install fastapi uvicorn python-jose python-dotenv pymongo langchain_community langchain_huggingface langchain_core python-multipart sentence-transformers
           npm ci
 
       - name: Khởi động FastAPI backend
