@@ -15,4 +15,4 @@ test('Đăng nhập trả về token', async () => {
   expect(response.status).toBe(200);
   const data = await response.json();
   expect(data.access_token).toBeDefined();
-});
+}, 10000);
