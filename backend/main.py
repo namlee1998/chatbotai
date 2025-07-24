@@ -105,6 +105,14 @@ def verify_token(token: str) -> str:
         return username
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
+@app.post("/api/chat")
+async def chat_endpoint(payload: dict):
+    question = payload.get("question", "")
+    if not bot:
+        return {"reply": "❌ Bot chưa được khởi tạo"}
+    answer = bot.retrieve_top_answer(question) or "I don't know"
+    bot.save_chat_history(question, answer)
+    return {"reply": answer}
 
 @app.post("/api/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
