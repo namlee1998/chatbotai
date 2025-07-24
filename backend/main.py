@@ -8,7 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import JWTError, jwt
 from dotenv import load_dotenv
-from chatbot import Chatbot
+from .chatbot import Chatbot
 import uvicorn
 # === Logging setup ===
 logging.basicConfig(level=logging.INFO)
