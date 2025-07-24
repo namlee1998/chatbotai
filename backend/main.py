@@ -56,9 +56,30 @@ class TokenData(BaseModel):
 # === Startup: initialize bot ===
 @app.on_event("startup")
 async def startup_event():
-    logger.info("🔧 Startup event running — chatbot init tạm thời bị vô hiệu hóa")
+    global bot
+    try:
+        logger.info("🔧 Initializing Chatbot at startup...")
+        bot = Chatbot(mongo_uri=MONGO_URI, chroma_path=CHROMA_PATH,db_name="chatbot_db")
+        logger.info("✅ Chatbot initialized at startup")
 
+        # Tạo vector DB sau khi chatbot được khởi tạo
+        pdf_path = os.getenv("PDF_PATH", r"D:\Project\fullstack_chatbot\backend\trainchatbot.pdf")
+        if not os.path.exists(pdf_path):
+            logger.warning(f"❌ PDF file not found at: {pdf_path}")
+            return
 
+        qa_pairs = bot.load_and_prepare_documents([pdf_path])
+        if qa_pairs:
+            bot.create_vector_store()
+            logger.info(f"✅ Vector DB created at startup with {len(qa_pairs)} QA pairs")
+        else:
+            logger.warning("⚠️ No QA pairs extracted from PDF")
+
+    except Exception as e:
+        logger.error("❌ Error initializing chatbot or vector store: %s", str(e))
+        bot = None
+
+    logger.info("🚀 Startup event completed")
 @app.get("/")
 def root():
     return {"message": "Server is alive"}
