@@ -22,7 +22,7 @@ jobs:
 
       - name: Cài đặt dependencies
         run: |
-          pip install fastapi uvicorn python-jose python-dotenv
+          pip install fastapi uvicorn python-jose python-dotenv pymongo
           npm ci
 
       - name: Khởi động FastAPI backend
