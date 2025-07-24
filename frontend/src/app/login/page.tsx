@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
 
   const handleLogin = async () => {
-    const response = await fetch("http://localhost:8080/api/login", {
+    const response = await fetch("https://chatbotai-1-r5ha.onrender.com/api/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
