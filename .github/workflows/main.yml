@@ -38,6 +38,12 @@ jobs:
       - name: Kiểm tra server đã sẵn sàng qua /health
         run: |
           until curl --silent http://localhost:8080/health | grep '"status":"ok"'; do sleep 1; done
+          timeout=60
+          while ! curl --silent http://localhost:8080/health | grep '"status":"ok"' && [ $timeout -gt 0 ]; do
+            sleep 1
+            timeout=$((timeout - 1))
+          done
+          [ $timeout -eq 0 ] && echo "❌ Hết thời gian chờ server!" && exit 1
           echo "✅ Server đã sẵn sàng tại cổng 8080"
 
       - name: Chạy kiểm thử frontend
