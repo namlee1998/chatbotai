@@ -9,4 +9,4 @@ python-dotenv
 numpy
 langchain-huggingface
 fastapi
-pythhon-jose
+python-jose
