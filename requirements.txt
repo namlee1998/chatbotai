@@ -10,3 +10,4 @@ numpy
 langchain-huggingface
 fastapi
 python-jose
+python-multipart
