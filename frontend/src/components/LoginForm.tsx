@@ -29,13 +29,24 @@ export default function LoginForm() {
     }
   }
 
-  return (
-    <div className="w-full max-w-md p-6 bg-white dark:bg-gray-900 rounded-xl shadow">
-      <h2 className="text-2xl font-semibold text-center mb-4">Đăng nhập</h2>
-      <Input className="mb-3" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
-      <Input className="mb-3" placeholder="Password" type="password" value={password} onChange={e => setPassword(e.target.value)} />
-      {error && <p className="text-sm text-red-500 mb-2">{error}</p>}
-      <Button className="w-full" onClick={handleLogin}>Đăng nhập</Button>
+ return (
+    <div className="min-h-screen bg-purple-100 flex flex-col items-center justify-center">
+      <h1 className="text-red-500 text-4xl font-bold drop-shadow mb-8">AI CHATBOT</h1>
+      <div className="bg-white p-6 rounded shadow-md w-80 space-y-4">
+        <input
+          type="text"
+          placeholder="Username"
+          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
+        />
+        <button className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">
+          LOGIN
+        </button>
+      </div>
     </div>
-  )
+  );
 }
