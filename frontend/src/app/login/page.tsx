@@ -29,28 +29,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4">
-      <h1 className="text-2xl font-bold mb-4">🔐 Đăng nhập</h1>
-      <div className="max-w-sm w-full border rounded p-4 shadow bg-white space-y-4">
+    <div className="min-h-screen bg-purple-100 flex flex-col items-center justify-center">
+      <h1 className="text-red-500 text-4xl font-bold drop-shadow mb-8">AI CHATBOT</h1>
+      <div className="bg-white p-6 rounded shadow-md w-80 space-y-4">
         <input
           type="text"
-          value={username}
-          placeholder="Tên đăng nhập"
-          onChange={(e) => setUsername(e.target.value)}
-          className="w-full border rounded px-3 py-2"
+          placeholder="Username"
+          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
         />
         <input
           type="password"
-          value={password}
-          placeholder="Mật khẩu"
-          onChange={(e) => setPassword(e.target.value)}
-          className="w-full border rounded px-3 py-2"
+          placeholder="Password"
+          className="w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
         />
-        <button
-          onClick={handleLogin}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 w-full"
-        >
-          Đăng nhập
+        <button className="w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition">
+          LOGIN
         </button>
       </div>
     </div>
