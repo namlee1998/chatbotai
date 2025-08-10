@@ -40,3 +40,67 @@ Chạy kiểm thử
 ✅ Nếu tất cả kiểm thử pass: Deploy tiếp tục
 
 ❌ Nếu kiểm thử fail: Dừng lại, bạn sửa code rồi push lại
+
+vấn đề lớn: kiểm thử fail. Sửa bằng cách sửa uvicorn backend.main:app --host 0.0.0.0 --port 8080
+ do file main đặt trong thư mục backend.
+vấn đề do trong github, ta phải dùng .chatbot để gọi file chatbot trong thư mục backend. Trong file main.yaml, phải dùng backend.main:app.
+Vấn đề tiếp theo, khởi chạy frontend thất bại: xung đột ip4 và 6
+Server đang chạy thật, nhưng npm test kết nối đến http://localhost:8080, mà hệ thống lại resolve thành http://[::1]:8080 → dẫn đến ECONNREFUSED.
+Backend dùng OAuth2PasswordRequestForm, nghĩa là FastAPI đang mong dữ liệu ở dạng: application/x-www-form-urlencoded, nhưng Nhưng bạn lại gửi JSON.
+
+deploy vercel+ render: Lắng nghe đúng host và cổng
+Render không cho phép bạn chạy trên cổng cố định như 8080. Thay vào đó, bạn cần lắng nghe cổng từ biến môi trường PORT.
+uvicorn main:app --host 0.0.0.0 --port $PORT
+
+Cấu hình trên Render
+
+Vào Render Dashboard
+
+Nhấn “New Web Service”
+
+Chọn repo GitHub của bạn
+
+Điền:
+
+Environment: Python
+
+Build Command: pip install -r requirements.txt
+
+Start Command: uvicorn main:app --host 0.0.0.0 --port $PORT
+
+Root Directory: nếu mã nguồn nằm trong thư mục con (ví dụ backend/)
+
+Dùng domain backend trong frontendfetch
+("https://your-backend.onrender.com/api/login", ...)
+
+Dùng ggcloud
+gcloud auth login
+gcloud projects list   : dua ra danh sach du an
+gcloud config set project PROJECT_ID   : chon du an 
+gcloud auth configure-docker   : logindocker
+gcloud projects add-iam-policy-binding chatbotai-467402 --member="user:longtaiew01@gmail.com" --role="roles/viewer": cai dat role
+docker tag fastapi-chabot:latest gcr.io/chatbotai-467402/fastapi-chabot:latest   : tag latest
+docker push gcr.io/chatbotai-467402/fastapi-chabot:latest   : push len gcloud
+
+gcloud run deploy cra-frontend --image gcr.io/chatbotai-467402/cra-frontend --platform managed --region asia-southeast1 --allow-unauthenticated
+
+gcloud run deploy backend-service --image gcr.io/chatbotai-467402/fastapi-chatbot --platform managed --region asia-southeast1 --allow-unauthenticated --timeout=600s --memory=1Gi
+
+
+vấn đề mới xả ra là back và front cung fphair dùng chung cổng 8080.
+https://cra-frontend-622933104662.asia-southeast1.run.app
+
+sửa lỗi thiếu thư viện không cần rebuild image:
+docker run -it ten-image /bin/bash
+pip install ...
+mở cmd khác
+docker ps 
+docker commit container_id ten-image-moi
+
+run docker local:
+docker run -e PORT=8080 -p 9090:8080 fastapi-chatbot:latest //van de la docker-backend chhiem cong 8080 nên phai chuyen qua 9090 local, tren container se dung 8080.
+
+Van đề đã được phat hiện là do tràn ram dẫn đếnkhông thể chạy chương trình trên ggcloud
+https://backend-service-622933104662.asia-southeast1.run.app
+Vấn đề mới là phải cấp thêm quyền để cho mọi người đều được access:
+gcloud run services add-iam-policy-binding backend-service --region asia-southeast1 --member="allUsers" --role="roles/run.invoker"

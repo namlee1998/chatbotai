@@ -4,12 +4,15 @@ import logging
 from datetime import datetime, timedelta
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 from chatbot import Chatbot
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import uvicorn
+from fastapi.responses import JSONResponse
+from fastapi import Request
+from fastapi.staticfiles import StaticFiles
 # === Logging setup ===
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,22 +23,23 @@ SECRET_KEY = os.getenv("SECRET_KEY", "secret")
 ALGORITHM = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 MONGO_URI = os.getenv("MONGO_URI")
-CHROMA_PATH = os.getenv("CHROMA_PATH", "D:\\Project\\fullstack_chatbot\\chatbot\\backend\\data")
+CHROMA_PATH = os.getenv("CHROMA_PATH")
+PDF_PATH = os.getenv("PDF_PATH")
 
 # === FastAPI app ===
 app = FastAPI()
-bot = None  # global bot
 
-logger.info("✅ Starting backend server setup...")
-
+app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
 # === CORS ===
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://cra-frontend-622933104662.asia-southeast1.run.app", "http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 # === Dummy User ===
 fake_users_db = {
@@ -45,13 +49,43 @@ fake_users_db = {
     }
 }
 
-# === Models ===
+# Auth setup
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
-class TokenData(BaseModel):
-    username: str | None = None
+class ChatRequest(BaseModel):
+    question: str
+
+# === Global bot ===
+bot = None
+
+# === Custom Exception Handler for CORS ===
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail},
+        headers={
+            "Access-Control-Allow-Origin": "https://cra-frontend-622933104662.asia-southeast1.run.app",
+            "Access-Control-Allow-Credentials": "true"
+        }
+    )
+
+# === OPTIONS Handler for Preflight ===
+@app.options("/api/login")
+async def options_login():
+    return JSONResponse(
+        content={},
+        headers={
+            "Access-Control-Allow-Origin": "https://cra-frontend-622933104662.asia-southeast1.run.app",
+            "Access-Control-Allow-Methods": "POST, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization",
+            "Access-Control-Allow-Credentials": "true"
+        }
+    )
 
 # === Startup: initialize bot ===
 @app.on_event("startup")
@@ -59,16 +93,15 @@ async def startup_event():
     global bot
     try:
         logger.info("🔧 Initializing Chatbot at startup...")
-        bot = Chatbot(mongo_uri=MONGO_URI, chroma_path=CHROMA_PATH,db_name="chatbot_db")
+        bot = Chatbot(mongo_uri=MONGO_URI, chroma_path=CHROMA_PATH, db_name="chatbot_db")
         logger.info("✅ Chatbot initialized at startup")
 
-        # Tạo vector DB sau khi chatbot được khởi tạo
-        pdf_path = os.getenv("PDF_PATH", r"D:\Project\fullstack_chatbot\backend\trainchatbot.pdf")
-        if not os.path.exists(pdf_path):
-            logger.warning(f"❌ PDF file not found at: {pdf_path}")
+        pdf_path = os.getenv("PDF_PATH")
+        if not os.path.exists(PDF_PATH):
+            logger.warning(f"❌ PDF file not found at: {PDF_PATH}")
             return
 
-        qa_pairs = bot.load_and_prepare_documents([pdf_path])
+        qa_pairs = bot.load_and_prepare_documents([PDF_PATH])
         if qa_pairs:
             bot.create_vector_store()
             logger.info(f"✅ Vector DB created at startup with {len(qa_pairs)} QA pairs")
@@ -109,9 +142,10 @@ def verify_token(token: str) -> str:
 
 @app.post("/api/login", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends()):
+    logger.info("Login request: username=%s, password=%s", form_data.username, form_data.password)
     user = fake_users_db.get(form_data.username)
     if not user or user["password"] != form_data.password:
-        logger.warning("❌ Invalid login attempt")
+        logger.warning("❌ Invalid login attempt for username: %s", form_data.username)
         raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     access_token = create_access_token(
@@ -120,6 +154,18 @@ def login(form_data: OAuth2PasswordRequestForm = Depends()):
     )
     logger.info("✅ Login success for user: %s", user["username"])
     return {"access_token": access_token, "token_type": "bearer"}
+
+# === API chat ===
+@app.post("/api/chat")
+async def chat_endpoint(payload: ChatRequest, token: str = Depends(oauth2_scheme)):
+    username = verify_token(token)
+    question = payload.question
+
+    if not bot:
+        return {"reply": "❌ Bot chưa được khởi tạo"}
+    answer = bot.retrieve_top_answer(question) or "I don't know"
+    bot.save_chat_history(question, answer)
+    return {"reply": answer}
 
 # === WebSocket chat ===
 @app.websocket("/ws")
@@ -156,7 +202,3 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error("❌ WebSocket error: %s", str(e))
         await websocket.close()
-
-
-if __name__ == "__main__":
-    uvicorn.run("chatbot:app", host="0.0.0.0", port=8000, workers=4)

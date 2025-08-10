@@ -9,4 +9,7 @@ python-dotenv
 numpy
 langchain-huggingface
 fastapi
-jose
+python-jose[cryptography]>=3.3.0
+python-multipart
+uvicorn
+faiss-cpu

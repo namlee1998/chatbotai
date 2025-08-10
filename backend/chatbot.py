@@ -6,14 +6,12 @@ from datetime import datetime
 
 from pymongo import MongoClient
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.documents import Document
 from dotenv import load_dotenv
 import os
 import time
 from langchain_community.vectorstores import FAISS
-from langchain_core.documents import Document
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -211,7 +209,8 @@ if __name__ == "__main__":
     print(f"✅ Chatbot initialized in {time.time() - start_time:.2f}s")
     
     print("📄 Đang load và tách tài liệu PDF...")
-    qa_pairs= bot.load_and_prepare_documents(["D:/Project/fullstack_chatbot/backend/trainchatbot.pdf"])
+    PDF_PATH= os.getenv("PDF_PATH")
+    qa_pairs= bot.load_and_prepare_documents(["PDF_PATH"])
     print(f"✅ Tải {len(qa_pairs)} cặp hỏi đáp thành công")
     
     try:
