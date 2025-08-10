@@ -13,13 +13,21 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
+      
+    - name: Decode service account key
+      run: echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > key.json
+      
     - name: Set up gcloud CLI
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: chatbotai-467402
         service_account_key: ${{ secrets.CHATBOT_SA_KEY }}
         export_default_credentials: true
+    - name: Authenticate with service account
+      run: |
+        gcloud auth activate-service-account 622933104662-compute@developer.gserviceaccount.com --key-file=key.json
+        gcloud config set account 622933104662-compute@developer.gserviceaccount.com
+        gcloud config set project chatbotai-467402
 
     - name: Enable required APIs
       run: |
