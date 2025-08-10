@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from jose import JWTError, jwt
 from dotenv import load_dotenv
-from chatbot import Chatbot
+from backend.chatbot import Chatbot
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 import uvicorn
 from fastapi.responses import JSONResponse
