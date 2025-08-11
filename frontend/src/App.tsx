@@ -7,7 +7,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         
-        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/" element={<ChatPage />} />
       </Routes>
     </BrowserRouter>
   );
