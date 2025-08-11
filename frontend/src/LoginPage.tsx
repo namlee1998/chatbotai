@@ -7,7 +7,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
-    const response = await fetch("https://backend-service-622933104662.asia-southeast1.run.app/api/login", {
+    const response = await fetch("https://chatbot-622933104662.asia-southeast1.run.app/api/login", {
       method: "POST",
 	  mode: "cors",
       headers: {
