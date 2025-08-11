@@ -47,3 +47,10 @@ jobs:
           --allow-unauthenticated \
           --timeout=600s \
           --memory=1Gi
+    - name: Allow unauthenticated invocations
+      run: |
+        gcloud run services add-iam-policy-binding chatbot \
+          --region asia-southeast1 \
+          --member="allUsers" \
+          --role="roles/run.invoker"
+
