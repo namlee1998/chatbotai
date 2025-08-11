@@ -10,11 +10,10 @@ export default function ChatPage() {
     const token = localStorage.getItem("access_token");
 
     try {
-      const response = await fetch("https://backend-service-622933104662.asia-southeast1.run.app/api/chat", {
+      const response = await fetch("https://chatbot-622933104662.asia-southeast1.run.app", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ question }),
       });
