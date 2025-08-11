@@ -44,8 +44,6 @@ jobs:
           --image gcr.io/chatbotai-467402/chatbot \
           --region asia-southeast1 \
           --platform managed \
-          --member=allUsers \
-          --role=roles/run.invoker \
           --allow-unauthenticated \
           --timeout=600s \
           --memory=1Gi
