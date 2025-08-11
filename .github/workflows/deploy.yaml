@@ -21,7 +21,7 @@ jobs:
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: chatbotai-467402
-        service_account_key: ${{ secrets.CHATBOT_SA_KEY }}
+        service_account_key: $${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
     - name: Authenticate with service account
       run: |
@@ -47,10 +47,5 @@ jobs:
           --allow-unauthenticated \
           --timeout=600s \
           --memory=1Gi
-    - name: Allow unauthenticated invocations
-      run: |
-        gcloud run services add-iam-policy-binding chatbot \
-          --region asia-southeast1 \
-          --member="allUsers" \
-          --role="roles/run.invoker"
+    
 
