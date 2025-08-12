@@ -1,5 +1,5 @@
 name: Deploy chatbot to Cloud Run
-#ver1
+
 on:
   push:
     branches:
@@ -13,20 +13,20 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-      
+
     - name: Decode service account key
       run: echo "${{ secrets.GCP_SA_KEY }}" | base64 --decode > key.json
-      
+
     - name: Set up gcloud CLI
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: chatbotai-467402
-        service_account_key: $${{ secrets.GCP_SA_KEY }}
+        service_account_key: ${{ secrets.GCP_SA_KEY }}
         export_default_credentials: true
+
     - name: Authenticate with service account
       run: |
-        gcloud auth activate-service-account 622933104662-compute@developer.gserviceaccount.com --key-file=key.json
-        gcloud config set account 622933104662-compute@developer.gserviceaccount.com
+        gcloud auth activate-service-account --key-file=key.json
         gcloud config set project chatbotai-467402
 
     - name: Enable required APIs
@@ -45,7 +45,26 @@ jobs:
           --region asia-southeast1 \
           --platform managed \
           --allow-unauthenticated \
-          --timeout=600s \
+          --timeout=600 \
           --memory=1Gi
-    
 
+    - name: Wait for service to be ready
+      run: |
+        echo "⏳ Waiting for Cloud Run service to be ready..."
+        for i in {1..10}; do
+          STATUS=$(gcloud run services describe chatbot --region asia-southeast1 --format='value(status.conditions[0].status)')
+          if [ "$STATUS" == "True" ]; then
+            echo "✅ Service is ready!"
+            break
+          fi
+          echo "Still starting... retry in 10s"
+          sleep 10
+        done
+
+    - name: Allow unauthenticated invocations
+      run: |
+        gcloud run services add-iam-policy-binding chatbot \
+          --region asia-southeast1 \
+          --member="allUsers" \
+          --role="roles/run.invoker" \
+          --project chatbotai-467402
