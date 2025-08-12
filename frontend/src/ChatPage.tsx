@@ -5,18 +5,19 @@ export default function ChatPage() {
   const [answer, setAnswer] = useState("");
 
   const handleSend = async () => {
-    if (!question.trim()) return;
-
-    const token = localStorage.getItem("access_token");
+    if (!question.trim()) return; // Không gửi nếu trống
 
     try {
-      const response = await fetch("https://chatbot-622933104662.asia-southeast1.run.app", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ question }),
-      });
+      const response = await fetch(
+        "https://chatbot-622933104662.asia-southeast1.run.app/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ question }),
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
@@ -29,19 +30,21 @@ export default function ChatPage() {
       console.error("Chat error:", error);
     }
 
-    setQuestion(""); // reset input
+    setQuestion(""); // Reset input
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-slate-900 flex flex-col items-center justify-center p-6 space-y-6">
-      {/* Hình ảnh robot + tiêu đề */}
+      {/* Logo + tiêu đề */}
       <div className="flex flex-col items-center space-y-4">
         <img
-          src="/images/thinkrobot.JPEG" // 👉 Thay bằng link thật của ảnh robot
+          src="/images/thinkrobot.JPEG"
           alt="Chatbot Robot"
           className="w-32 h-32"
         />
-        <h1 className="text-white text-4xl font-bold drop-shadow">Namlee Chatbot</h1>
+        <h1 className="text-white text-4xl font-bold drop-shadow">
+          Namlee Chatbot
+        </h1>
       </div>
 
       {/* Form chat */}
