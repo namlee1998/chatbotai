@@ -1,15 +1,13 @@
 import os
 import json
 import logging
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from backend.chatbot import Chatbot
-import uvicorn
-from fastapi.responses import JSONResponse
-from fastapi import Request
+from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+import uvicorn
 
 # === Logging setup ===
 logging.basicConfig(level=logging.INFO)
@@ -24,51 +22,19 @@ PDF_PATH = os.getenv("PDF_PATH")
 # === FastAPI app ===
 app = FastAPI()
 
-# Serve frontend static files
-app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
+# Serve frontend static files under /static
+app.mount("/static", StaticFiles(directory="backend/static", html=True), name="static")
 
-# === CORS ===
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[
-        "https://cra-frontend-622933104662.asia-southeast1.run.app",
-        "http://localhost:3000"
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Serve index.html at root
+@app.get("/")
+def serve_index():
+    return FileResponse("backend/static/index.html")
 
 class ChatRequest(BaseModel):
     question: str
 
 # === Global bot ===
 bot = None
-
-# === Custom Exception Handler for CORS ===
-@app.exception_handler(HTTPException)
-async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-        headers={
-            "Access-Control-Allow-Origin": "https://cra-frontend-622933104662.asia-southeast1.run.app",
-            "Access-Control-Allow-Credentials": "true"
-        }
-    )
-
-# === OPTIONS Handler for Preflight ===
-@app.options("/api/chat")
-async def options_chat():
-    return JSONResponse(
-        content={},
-        headers={
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Methods": "POST, OPTIONS",
-            "Access-Control-Allow-Headers": "Content-Type, Authorization",
-            "Access-Control-Allow-Credentials": "true"
-        }
-    )
 
 # === Startup: initialize bot ===
 @app.on_event("startup")
@@ -96,16 +62,12 @@ async def startup_event():
 
     logger.info("🚀 Startup event completed")
 
-@app.get("/")
-def root():
-    return {"message": "Server is alive"}
-
 # === Health check ===
 @app.get("/health")
 def health_check():
     return {"status": "ok", "server": bot is not None}
 
-# === API chat (no auth) ===
+# === API chat ===
 @app.post("/api/chat")
 async def chat_endpoint(payload: ChatRequest):
     question = payload.question
@@ -115,11 +77,11 @@ async def chat_endpoint(payload: ChatRequest):
     bot.save_chat_history(question, answer)
     return {"reply": answer}
 
-# === WebSocket chat (no auth) ===
+# === WebSocket chat ===
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    logger.info("🔌 WebSocket connected (no auth)")
+    logger.info("🔌 WebSocket connected")
 
     try:
         while True:
