@@ -8,7 +8,7 @@ export default function ChatPage() {
     if (!question.trim()) return;
 
     try {
-      const response = await fetch("/api/chat", {
+      const response = await fetch("/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export default function ChatPage() {
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-slate-900 flex flex-col items-center justify-center p-6 space-y-6">
       <div className="flex flex-col items-center space-y-4">
         <img
-          src="/images/thinkrobot.JPEG"
+          src="/images/thinkrobot.jpeg"
           alt="Chatbot Robot"
           className="w-32 h-32"
         />
