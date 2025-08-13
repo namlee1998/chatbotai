@@ -36,7 +36,7 @@ export default function ChatPage() {
         <img
           src="/images/thinkrobot.jpeg"
           alt="Chatbot Robot"
-          className="w-32 h-32"
+          className="w-60 h-60"
         />
         <h1 className="text-white text-4xl font-bold drop-shadow">
           Namlee Chatbot
