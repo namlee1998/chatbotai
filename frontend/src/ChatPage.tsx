@@ -8,7 +8,7 @@ export default function ChatPage() {
     if (!question.trim()) return;
 
     try {
-      const response = await fetch("/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
