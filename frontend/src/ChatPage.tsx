@@ -5,19 +5,16 @@ export default function ChatPage() {
   const [answer, setAnswer] = useState("");
 
   const handleSend = async () => {
-    if (!question.trim()) return; // Không gửi nếu trống
+    if (!question.trim()) return;
 
     try {
-      const response = await fetch(
-        "https://chatbot-622933104662.asia-southeast1.run.app/api/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ question }),
-        }
-      );
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question }),
+      });
 
       if (response.ok) {
         const data = await response.json();
@@ -30,12 +27,11 @@ export default function ChatPage() {
       console.error("Chat error:", error);
     }
 
-    setQuestion(""); // Reset input
+    setQuestion("");
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-slate-900 flex flex-col items-center justify-center p-6 space-y-6">
-      {/* Logo + tiêu đề */}
       <div className="flex flex-col items-center space-y-4">
         <img
           src="/images/thinkrobot.JPEG"
@@ -47,7 +43,6 @@ export default function ChatPage() {
         </h1>
       </div>
 
-      {/* Form chat */}
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md space-y-4">
         <textarea
           value={question}
