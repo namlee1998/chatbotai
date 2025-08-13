@@ -21,9 +21,6 @@ PDF_PATH = os.getenv("PDF_PATH")
 # === FastAPI app ===
 app = FastAPI()
 
-# === Serve frontend static files (React build) ===
-app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
-
 class ChatRequest(BaseModel):
     question: str
 
@@ -31,7 +28,7 @@ class ChatRequest(BaseModel):
 bot = None
 
 # === API chat ===
-@app.post("/api/chat")
+@app.post("/chat")
 async def chat_endpoint(payload: ChatRequest):
     question = payload.question
     if not bot:
@@ -39,7 +36,8 @@ async def chat_endpoint(payload: ChatRequest):
     answer = bot.retrieve_top_answer(question) or "I don't know"
     bot.save_chat_history(question, answer)
     return {"reply": answer}
-
+# === Serve frontend static files (React build) ===
+app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
 # === Health check ===
 @app.get("/health")
 def health_check():
