@@ -26,9 +26,34 @@ class ChatRequest(BaseModel):
 
 # === Global bot ===
 bot = None
+# === Startup: initialize bot ===
+@app.on_event("startup")
+async def startup_event():
+    global bot
+    try:
+        logger.info("🔧 Initializing Chatbot at startup...")
+        bot = Chatbot(mongo_uri=MONGO_URI, chroma_path=CHROMA_PATH, db_name="chatbot_db")
+        logger.info("✅ Chatbot initialized at startup")
+
+        if not os.path.exists(PDF_PATH):
+            logger.warning(f"❌ PDF file not found at: {PDF_PATH}")
+            return
+
+        qa_pairs = bot.load_and_prepare_documents([PDF_PATH])
+        if qa_pairs:
+            bot.create_vector_store()
+            logger.info(f"✅ Vector DB created at startup with {len(qa_pairs)} QA pairs")
+        else:
+            logger.warning("⚠️ No QA pairs extracted from PDF")
+
+    except Exception as e:
+        logger.error("❌ Error initializing chatbot or vector store: %s", str(e))
+        bot = None
+
+    logger.info("🚀 Startup event completed")
 
 # === API chat ===
-@app.post("/chat")
+@app.post("/api/chat")
 async def chat_endpoint(payload: ChatRequest):
     question = payload.question
     if not bot:
@@ -37,14 +62,14 @@ async def chat_endpoint(payload: ChatRequest):
     bot.save_chat_history(question, answer)
     return {"reply": answer}
 # === Serve frontend static files (React build) ===
-app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
+
 # === Health check ===
-@app.get("/health")
+@app.get("/api/health")
 def health_check():
     return {"status": "ok", "server": bot is not None}
 
 # === WebSocket chat ===
-@app.websocket("/ws")
+@app.websocket("/api/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     logger.info("🔌 WebSocket connected")
@@ -71,29 +96,4 @@ async def websocket_endpoint(websocket: WebSocket):
     except Exception as e:
         logger.error("❌ WebSocket error: %s", str(e))
         await websocket.close()
-
-# === Startup: initialize bot ===
-@app.on_event("startup")
-async def startup_event():
-    global bot
-    try:
-        logger.info("🔧 Initializing Chatbot at startup...")
-        bot = Chatbot(mongo_uri=MONGO_URI, chroma_path=CHROMA_PATH, db_name="chatbot_db")
-        logger.info("✅ Chatbot initialized at startup")
-
-        if not os.path.exists(PDF_PATH):
-            logger.warning(f"❌ PDF file not found at: {PDF_PATH}")
-            return
-
-        qa_pairs = bot.load_and_prepare_documents([PDF_PATH])
-        if qa_pairs:
-            bot.create_vector_store()
-            logger.info(f"✅ Vector DB created at startup with {len(qa_pairs)} QA pairs")
-        else:
-            logger.warning("⚠️ No QA pairs extracted from PDF")
-
-    except Exception as e:
-        logger.error("❌ Error initializing chatbot or vector store: %s", str(e))
-        bot = None
-
-    logger.info("🚀 Startup event completed")
+app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
