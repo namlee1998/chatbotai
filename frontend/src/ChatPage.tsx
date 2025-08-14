@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function ChatPage() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
+  const [botReady, setBotReady] = useState(false);
 
   useEffect(() => {
     const checkBot = async () => {
@@ -12,15 +13,16 @@ export default function ChatPage() {
         if (data.server) {
           setBotReady(true);
         } else {
-          setAnswer("⏳ Bot đang khởi tạo, vui lòng đợi...");
+          setBotReady(false);
         }
-      } catch {
-        setAnswer("❌ Không thể kết nối tới server.");
+      } catch (error) {
+        console.error("Error checking bot health:", error);
+        setBotReady(false);
       }
     };
+
     checkBot();
   }, []);
-
   const handleSend = async () => {
     if (!question.trim()) return;
     if (!botReady) {
