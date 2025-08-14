@@ -46,7 +46,7 @@ jobs:
             --allow-unauthenticated \
             --timeout=600 \
             --memory=2Gi \
-            --set-env-vars PDF_PATH=/app/backend/trainchatbot.pdf,CHROMA_PATH=/app/data
+            --set-env-vars PDF_PATH=/app/trainchatbot.pdf,CHROMA_PATH=/app/data
 
       - name: Wait for service to be ready
         run: |
