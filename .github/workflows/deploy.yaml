@@ -42,12 +42,12 @@ jobs:
           gcloud run deploy chatbot \
             --image gcr.io/chatbotai-467402/chatbot \
             --region asia-southeast1 \
-            --update-env-vars MONGO_URI="mongodb+srv://longtaiew01:Tancuong2028@chatbot.snfe5gt.mongodb.net/?retryWrites=true&w=majority&appName=chatbot" \
+            --update-env-vars MONGO_URI="mongodb+srv://longtaiew01:Tancuong2028@chatbot.snfe5gt.mongodb.net/?retryWrites=true&w=majority&appName=chatbot",PDF_PATH=/app/trainchatbot.pdf,CHROMA_PATH=/app/data \
             --platform managed \
             --allow-unauthenticated \
             --timeout=600 \
-            --memory=2Gi \
-            --set-env-vars PDF_PATH=/app/trainchatbot.pdf,CHROMA_PATH=/app/data
+            --memory=4Gi \
+            
 
       - name: Wait for service to be ready
         run: |
