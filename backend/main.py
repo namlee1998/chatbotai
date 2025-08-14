@@ -1,10 +1,10 @@
+# backend/main.py
 import os
 import json
 import logging
 from dotenv import load_dotenv
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
-from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from backend.chatbot import Chatbot
 
@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 # === Load env ===
 load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
-CHROMA_PATH = os.getenv("CHROMA_PATH")
-PDF_PATH = os.getenv("PDF_PATH")
+CHROMA_PATH = os.getenv("CHROMA_PATH", "/app/data")  # default an toàn
+# Nếu PDF_PATH không set từ env, mặc định dùng file đã COPY trong image
+PDF_PATH = os.getenv("PDF_PATH", "/app/trainchatbot.pdf")
 
 # === FastAPI app ===
 app = FastAPI()
@@ -26,6 +27,7 @@ class ChatRequest(BaseModel):
 
 # === Global bot ===
 bot = None
+
 # === Startup: initialize bot ===
 @app.on_event("startup")
 async def startup_event():
@@ -37,7 +39,7 @@ async def startup_event():
 
         if not os.path.exists(PDF_PATH):
             logger.warning(f"❌ PDF file not found at: {PDF_PATH}")
-            return
+            return  # giữ nguyên logic: bot vẫn tồn tại, chỉ không build vector
 
         qa_pairs = bot.load_and_prepare_documents([PDF_PATH])
         if qa_pairs:
@@ -47,7 +49,8 @@ async def startup_event():
             logger.warning("⚠️ No QA pairs extracted from PDF")
 
     except Exception as e:
-        logger.error("❌ Error initializing chatbot or vector store: %s", str(e))
+        # Log full stack trace để dễ debug
+        logger.exception("❌ Error initializing chatbot or vector store")
         bot = None
 
     logger.info("🚀 Startup event completed")
@@ -61,11 +64,11 @@ async def chat_endpoint(payload: ChatRequest):
     answer = bot.retrieve_top_answer(question) or "I don't know"
     bot.save_chat_history(question, answer)
     return {"reply": answer}
-# === Serve frontend static files (React build) ===
 
 # === Health check ===
 @app.get("/api/health")
 def health_check():
+    # giữ nguyên cấu trúc trả về cũ để frontend không phải đổi nhiều
     return {"status": "ok", "server": bot is not None}
 
 # === WebSocket chat ===
@@ -93,7 +96,9 @@ async def websocket_endpoint(websocket: WebSocket):
 
     except WebSocketDisconnect:
         logger.info("🔌 WebSocket disconnected")
-    except Exception as e:
-        logger.error("❌ WebSocket error: %s", str(e))
+    except Exception:
+        logger.exception("❌ WebSocket error")
         await websocket.close()
+
+# === Serve frontend static files (React build) ===
 app.mount("/", StaticFiles(directory="backend/static", html=True), name="static")
