@@ -1,5 +1,4 @@
-# Dockerfile
-# Stage 1: Build React frontend
+
 FROM node:18 AS frontend-builder
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
@@ -7,13 +6,13 @@ RUN npm install
 COPY frontend/ ./
 RUN npm run build
 
-# Stage 2: Build FastAPI backend
+
 FROM python:3.11-slim AS backend
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV CHROMA_PATH=/app/data
-ENV PDF_PATH=/app/backend/trainchatbot.pdf   # <-- thêm dòng này
+ENV PDF_PATH=/app/backend/trainchatbot.pdf
 ENV PORT=8080
 
 RUN apt-get update && apt-get install -y \
