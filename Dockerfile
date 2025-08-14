@@ -12,7 +12,7 @@ FROM python:3.11-slim AS backend
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV CHROMA_PATH=/app/data
-ENV PDF_PATH=/app/backend/trainchatbot.pdf
+ENV PDF_PATH=/app/trainchatbot.pdf
 ENV PORT=8080
 
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY backend/ ./backend
-COPY backend/trainchatbot.pdf ./backend/trainchatbot.pdf
+COPY /trainchatbot.pdf ./trainchatbot.pdf
 COPY --from=frontend-builder /app/frontend/build ./backend/static
 
 RUN mkdir -p /app/data
