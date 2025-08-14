@@ -7,7 +7,7 @@ export default function ChatPage() {
   const [botReady, setBotReady] = useState(false);
 
   useEffect(() => {
-    let timer;
+    let timer: ReturnType<typeof setTimeout>;
 
     const checkBot = async () => {
       try {
