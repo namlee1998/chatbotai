@@ -17,7 +17,7 @@ load_dotenv()
 MONGO_URI = os.getenv("MONGO_URI")
 CHROMA_PATH = os.getenv("CHROMA_PATH", "/app/data")  # default an toàn
 # Nếu PDF_PATH không set từ env, mặc định dùng file đã COPY trong image
-PDF_PATH = os.getenv("PDF_PATH", "/app/trainchatbot.pdf"))
+PDF_PATH = os.getenv("PDF_PATH", "/app/trainchatbot.pdf")
 
 # === FastAPI app ===
 app = FastAPI()
