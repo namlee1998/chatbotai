@@ -4,15 +4,34 @@ export default function ChatPage() {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
 
+  useEffect(() => {
+    const checkBot = async () => {
+      try {
+        const res = await fetch("/api/health");
+        const data = await res.json();
+        if (data.server) {
+          setBotReady(true);
+        } else {
+          setAnswer("⏳ Bot đang khởi tạo, vui lòng đợi...");
+        }
+      } catch {
+        setAnswer("❌ Không thể kết nối tới server.");
+      }
+    };
+    checkBot();
+  }, []);
+
   const handleSend = async () => {
     if (!question.trim()) return;
+    if (!botReady) {
+      setAnswer("⚠️ Bot chưa sẵn sàng, thử lại sau.");
+      return;
+    }
 
     try {
       const response = await fetch("/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question }),
       });
 
@@ -26,9 +45,9 @@ export default function ChatPage() {
       setAnswer("❌ Không thể kết nối tới chatbot.");
       console.error("Chat error:", error);
     }
-
     setQuestion("");
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 to-slate-900 flex flex-col items-center justify-center p-6 space-y-6">
