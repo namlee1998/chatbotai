@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: my-agent
+    runtime: docker
+    plan: free
+
+    dockerfilePath: ./02-docker/develop/Dockerfile
+
+    envVars:
+      - key: PORT
+        value: 8000
+
+    autoDeploy: true
